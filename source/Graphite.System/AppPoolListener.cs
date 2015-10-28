@@ -154,35 +154,42 @@ namespace Graphite.System
                 CreateNoWindow = true,
             };
 
-            StringBuilder standardOut = new StringBuilder();
+	        try
+	        {
+		        StringBuilder standardOut = new StringBuilder();
 
-            Process p = Process.Start(startInfo);
+		        Process p = Process.Start(startInfo);
 
-            p.OutputDataReceived += (object s, DataReceivedEventArgs d) => standardOut.AppendLine(d.Data);
-            p.BeginOutputReadLine();
+		        p.OutputDataReceived += (object s, DataReceivedEventArgs d) => standardOut.AppendLine(d.Data);
+		        p.BeginOutputReadLine();
 
-            bool success = p.WaitForExit(maxMilliseconds);
-            p.CancelOutputRead();
+		        bool success = p.WaitForExit(maxMilliseconds);
+		        p.CancelOutputRead();
 
-            if (!success)
-            {
-                try
-                {
-                    p.Kill();
-                }
-                catch (Win32Exception)
-                {
-                    // unable to kill the process
-                }
-                catch (InvalidOperationException)
-                {
-                    // process already stopped
-                }
-            }
+		        if (!success)
+		        {
+			        try
+			        {
+				        p.Kill();
+			        }
+			        catch (Win32Exception)
+			        {
+				        // unable to kill the process
+			        }
+			        catch (InvalidOperationException)
+			        {
+				        // process already stopped
+			        }
+		        }
 
-            result = standardOut.ToString();
-
-            return success;
+		        result = standardOut.ToString();
+				return success;
+	        }
+	        catch (Exception e)
+	        {
+		        result = string.Empty;
+		        return false;
+	        }
         }
     }
 }
